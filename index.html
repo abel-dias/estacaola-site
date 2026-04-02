@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EstaçãoLA - Monitoramento</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main class="container">
+    <h1>EstaçãoLA - Monitoramento em Tempo Real</h1>
+    <p class="subtitle">Dados públicos da estação meteorológica</p>
+
+    <section class="cards">
+      <div class="gauge-card">
+        <div class="gauge gauge-temp" id="gauge-temp-dht">
+          <div class="needle"></div>
+        </div>
+        <div class="value" id="temp-dht-value">--</div>
+        <div class="label">Temperatura DHT22</div>
+      </div>
+
+      <div class="gauge-card">
+        <div class="gauge gauge-temp" id="gauge-temp-bmp">
+          <div class="needle"></div>
+        </div>
+        <div class="value" id="temp-bmp-value">--</div>
+        <div class="label">Temperatura BMP280</div>
+      </div>
+
+      <div class="gauge-card">
+        <div class="gauge gauge-umidade" id="gauge-umidade">
+          <div class="needle"></div>
+        </div>
+        <div class="value" id="umidade-value">--</div>
+        <div class="label">Umidade</div>
+      </div>
+
+      <div class="gauge-card">
+        <div class="gauge gauge-pressao" id="gauge-pressao">
+          <div class="needle"></div>
+        </div>
+        <div class="value" id="pressao-value">--</div>
+        <div class="label">Pressão Atmosférica</div>
+      </div>
+    </section>
+
+    <section class="bottom-grid">
+      <div class="panel">
+        <h2>Temperatura BMP280</h2>
+        <canvas id="chartBmp"></canvas>
+      </div>
+
+      <div class="panel">
+        <h2>Temperatura DHT22</h2>
+        <canvas id="chartDht"></canvas>
+      </div>
+
+      <div class="panel compass-panel">
+        <h2>Direção do Vento</h2>
+        <div class="compass">
+          <div class="compass-letter north">N</div>
+          <div class="compass-letter south">S</div>
+          <div class="compass-letter east">L</div>
+          <div class="compass-letter west">O</div>
+          <div class="compass-arrow" id="compass-arrow"></div>
+          <div class="compass-center"></div>
+        </div>
+        <p id="vento-direcao-text">Direção: --</p>
+        <p id="vento-vel-text">Velocidade: --</p>
+        <p id="chuva-text">Chuva: --</p>
+      </div>
+    </section>
+
+    <footer>
+      <span id="last-update">Última atualização: --</span>
+    </footer>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
