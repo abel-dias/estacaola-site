@@ -2,15 +2,25 @@ export async function onRequestGet(context) {
   const HA_URL = context.env.HA_URL;
   const HA_TOKEN = context.env.HA_TOKEN;
 
+  const url = new URL(context.request.url);
+  const period = url.searchParams.get("period") || "24h";
+
   const ENTITIES = {
     temperatura_dht: "sensor.estacao_meteorologica_temperatura_dht22",
     temperatura_bmp: "sensor.estacao_meteorologica_temperatura_bmp280",
     umidade: "sensor.estacao_meteorologica_umidade",
     pressao: "sensor.estacao_meteorologica_pressao_atmosferica",
     vento_vel: "sensor.estacao_meteorologica_velocidade_do_vento",
-    vento_dir: "sensor.estacao_meteorologica_direcao_do_vento",
+    vento_dir: "text_sensor.estacao_meteorologica_direcao_do_vento",
     chuva: "sensor.estacao_meteorologica_pluviometro_volume",
   };
+
+  function getHoursFromPeriod(period) {
+    if (period === "24h") return 24;
+    if (period === "7d") return 24 * 7;
+    if (period === "30d") return 24 * 30;
+    return 24;
+  }
 
   async function getState(entityId) {
     const res = await fetch(`${HA_URL}/api/states/${entityId}`, {
@@ -27,12 +37,12 @@ export async function onRequestGet(context) {
     return res.json();
   }
 
-  async function getHistory(entityId, hours = 6) {
+  async function getHistory(entityId, hours = 24) {
     const start = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
     const end = new Date().toISOString();
 
     const res = await fetch(
-      `${HA_URL}/api/history/period/${start}?filter_entity_id=${entityId}&end_time=${encodeURIComponent(end)}&minimal_response&no_attributes`,
+      `${HA_URL}/api/history/period/${start}?filter_entity_id=${encodeURIComponent(entityId)}&end_time=${encodeURIComponent(end)}&minimal_response&no_attributes`,
       {
         headers: {
           Authorization: `Bearer ${HA_TOKEN}`,
@@ -50,6 +60,8 @@ export async function onRequestGet(context) {
   }
 
   try {
+    const hours = getHoursFromPeriod(period);
+
     const [
       temperaturaDht,
       temperaturaBmp,
@@ -59,7 +71,6 @@ export async function onRequestGet(context) {
       ventoDir,
       chuva,
       histBmp,
-      histDht,
     ] = await Promise.all([
       getState(ENTITIES.temperatura_dht),
       getState(ENTITIES.temperatura_bmp),
@@ -68,13 +79,13 @@ export async function onRequestGet(context) {
       getState(ENTITIES.vento_vel),
       getState(ENTITIES.vento_dir),
       getState(ENTITIES.chuva),
-      getHistory(ENTITIES.temperatura_bmp, 6),
-      getHistory(ENTITIES.temperatura_dht, 6),
+      getHistory(ENTITIES.temperatura_bmp, hours),
     ]);
 
     return new Response(
       JSON.stringify({
         updated_at: new Date().toISOString(),
+        period,
         current: {
           temperatura_dht: {
             state: temperaturaDht.state,
@@ -107,12 +118,6 @@ export async function onRequestGet(context) {
         },
         history: {
           temperatura_bmp: histBmp
-            .map((item) => ({
-              x: item.last_changed,
-              y: Number(item.state),
-            }))
-            .filter((item) => !Number.isNaN(item.y)),
-          temperatura_dht: histDht
             .map((item) => ({
               x: item.last_changed,
               y: Number(item.state),
