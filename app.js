@@ -3,7 +3,7 @@ const HA_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkZjMyMzE0YzM0O
 
 // Entidades
 const ENTIDADES = {
-  temperatura: "sensor.estacao_meteorologica_temperatura_bmp280",
+  temperatura: "sensor.estacao_meteorologica_temperatura_dht22",
   umidade: "sensor.estacao_meteorologica_umidade",
   pressao: "sensor.estacao_meteorologica_pressao_atmosferica",
   vento: "sensor.estacao_meteorologica_velocidade_do_vento",
