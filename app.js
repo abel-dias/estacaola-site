@@ -1,203 +1,226 @@
-let bmpChart = null;
-let dhtChart = null;
-let updating = false;
+const HA_URL = "https://ha.estacaola.com.br";
+const HA_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkZjMyMzE0YzM0OGU0MjNiOTEzMGViNGFjOWZlMTM4NSIsImlhdCI6MTc3NjEwODk3MSwiZXhwIjoyMDkxNDY4OTcxfQ.GfHs4OY_VbaqGloq16Xb4qIeg7FeCxwiaJ8huwrdhTE";
 
-function formatValue(value, unit = "") {
-  if (
-    value === undefined ||
-    value === null ||
-    value === "unknown" ||
-    value === "unavailable"
-  ) {
-    return "--";
-  }
+// Entidades
+const ENTIDADES = {
+  temperatura: "sensor.estacao_meteorologica_temperatura_bmp280",
+  umidade: "sensor.estacao_meteorologica_umidade",
+  pressao: "sensor.estacao_meteorologica_pressao_atmosferica",
+  vento: "sensor.estacao_meteorologica_velocidade_do_vento",
+  chuva: "sensor.estacao_meteorologica_pluviometro_volume",
+  direcao: "text_sensor.estacao_meteorologica_direcao_do_vento"
+};
 
-  const number = Number(value);
-  if (!Number.isNaN(number)) {
-    return `${number.toFixed(1).replace(".", ",")} ${unit}`.trim();
-  }
+let graficoTemperatura = null;
 
-  return `${value} ${unit}`.trim();
-}
+function marcarBotaoAtivo(periodo) {
+  document.querySelectorAll(".filtros-periodo button").forEach(btn => {
+    btn.classList.remove("ativo");
+  });
 
-function setGauge(gaugeId, min, max, value) {
-  const gauge = document.getElementById(gaugeId);
-  if (!gauge) return;
-
-  const needle = gauge.querySelector(".needle");
-  if (!needle) return;
-
-  const number = Number(value);
-  if (Number.isNaN(number)) return;
-
-  const clamped = Math.max(min, Math.min(max, number));
-  const ratio = (clamped - min) / (max - min);
-  const degrees = -90 + ratio * 180;
-
-  needle.style.transform = `translateX(-50%) rotate(${degrees}deg)`;
-}
-
-function directionToDegrees(direction) {
-  const map = {
-    Norte: 0,
-    Nordeste: 45,
-    Leste: 90,
-    Sudeste: 135,
-    Sul: 180,
-    Sudoeste: 225,
-    Oeste: 270,
-    Noroeste: 315,
-    Indefinida: 0,
+  const mapa = {
+    "24h": "btn-24h",
+    "7d": "btn-7d",
+    "30d": "btn-30d"
   };
 
-  return map[direction] ?? 0;
+  const botao = document.getElementById(mapa[periodo]);
+  if (botao) botao.classList.add("ativo");
 }
 
-function buildChart(canvasId, label, points, existingChart) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return null;
+function calcularInicio(periodo) {
+  const agora = new Date();
+  const inicio = new Date(agora);
 
-  const labels = points.map((p) =>
-    new Date(p.x).toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  );
-
-  const values = points.map((p) => p.y);
-
-  if (existingChart) {
-    existingChart.data.labels = labels;
-    existingChart.data.datasets[0].data = values;
-    existingChart.update();
-    return existingChart;
+  if (periodo === "24h") {
+    inicio.setHours(agora.getHours() - 24);
+  } else if (periodo === "7d") {
+    inicio.setDate(agora.getDate() - 7);
+  } else if (periodo === "30d") {
+    inicio.setDate(agora.getDate() - 30);
   }
 
-  return new Chart(canvas, {
+  return { inicio, agora };
+}
+
+async function buscarEstadoAtual(entityId) {
+  const resposta = await fetch(`${HA_URL}/api/states/${entityId}`, {
+    headers: {
+      Authorization: `Bearer ${HA_TOKEN}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  if (!resposta.ok) {
+    throw new Error(`Erro ao buscar estado de ${entityId}`);
+  }
+
+  return await resposta.json();
+}
+
+async function buscarHistorico(entityId, periodo) {
+  const { inicio, agora } = calcularInicio(periodo);
+
+  const url =
+    `${HA_URL}/api/history/period/${inicio.toISOString()}` +
+    `?filter_entity_id=${entityId}` +
+    `&end_time=${agora.toISOString()}`;
+
+  const resposta = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${HA_TOKEN}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  if (!resposta.ok) {
+    throw new Error(`Erro ao buscar histórico de ${entityId}`);
+  }
+
+  const dados = await resposta.json();
+  return dados[0] || [];
+}
+
+function formatarData(dataIso, periodo) {
+  const data = new Date(dataIso);
+
+  if (periodo === "24h") {
+    return data.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  return data.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit"
+  });
+}
+
+function reduzirHistorico(historico, periodo) {
+  if (periodo === "24h") {
+    return historico.filter((_, i) => i % 5 === 0);
+  }
+
+  if (periodo === "7d") {
+    return historico.filter((_, i) => i % 12 === 0);
+  }
+
+  if (periodo === "30d") {
+    return historico.filter((_, i) => i % 24 === 0);
+  }
+
+  return historico;
+}
+
+function atualizarGraficoTemperatura(labels, valores, periodo) {
+  const ctx = document.getElementById("graficoTemperatura").getContext("2d");
+
+  if (graficoTemperatura) {
+    graficoTemperatura.destroy();
+  }
+
+  graficoTemperatura = new Chart(ctx, {
     type: "line",
     data: {
       labels,
       datasets: [
         {
-          label,
-          data: values,
-          tension: 0.35,
+          label: `Temperatura (${periodo})`,
+          data: valores,
           borderWidth: 2,
-          pointRadius: 0,
-        },
-      ],
+          tension: 0.3,
+          fill: false
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          display: false,
-        },
+          display: true
+        }
       },
       scales: {
-        x: {
-          ticks: { color: "#ccc" },
-          grid: { color: "#333" },
-        },
         y: {
-          ticks: { color: "#ccc" },
-          grid: { color: "#333" },
-        },
-      },
-    },
+          beginAtZero: false
+        }
+      }
+    }
   });
 }
 
-async function loadData() {
+async function trocarPeriodo(periodo) {
   try {
-    const response = await fetch("/api/estacao", {
-      cache: "no-store",
+    marcarBotaoAtivo(periodo);
+
+    const historicoBruto = await buscarHistorico(ENTIDADES.temperatura, periodo);
+    const historico = reduzirHistorico(historicoBruto, periodo);
+
+    const labels = [];
+    const valores = [];
+
+    historico.forEach(item => {
+      const valor = parseFloat(item.state);
+      if (!isNaN(valor)) {
+        labels.push(formatarData(item.last_changed, periodo));
+        valores.push(valor);
+      }
     });
 
-    const data = await response.json();
-
-    if (data.error) {
-      console.error(data.message);
-      return;
-    }
-
-    document.getElementById("temp-dht-value").textContent = formatValue(
-      data.current.temperatura_dht.state,
-      data.current.temperatura_dht.unit
-    );
-
-    document.getElementById("temp-bmp-value").textContent = formatValue(
-      data.current.temperatura_bmp.state,
-      data.current.temperatura_bmp.unit
-    );
-
-    document.getElementById("umidade-value").textContent = formatValue(
-      data.current.umidade.state,
-      data.current.umidade.unit
-    );
-
-    document.getElementById("pressao-value").textContent = formatValue(
-      data.current.pressao.state,
-      data.current.pressao.unit
-    );
-
-    document.getElementById("vento-direcao-text").textContent =
-      `Direção: ${data.current.vento_dir.state || "--"}`;
-
-    document.getElementById("vento-vel-text").textContent =
-      `Velocidade: ${formatValue(
-        data.current.vento_vel.state,
-        data.current.vento_vel.unit
-      )}`;
-
-    document.getElementById("chuva-text").textContent =
-      `Chuva: ${formatValue(
-        data.current.chuva.state,
-        data.current.chuva.unit
-      )}`;
-
-    document.getElementById("last-update").textContent =
-      `Última atualização: ${new Date(data.updated_at).toLocaleString("pt-BR")}`;
-
-    setGauge("gauge-temp-dht", 0, 50, data.current.temperatura_dht.state);
-    setGauge("gauge-temp-bmp", 0, 50, data.current.temperatura_bmp.state);
-    setGauge("gauge-umidade", 0, 100, data.current.umidade.state);
-    setGauge("gauge-pressao", 900, 1100, data.current.pressao.state);
-
-    const compassDegrees = directionToDegrees(data.current.vento_dir.state);
-    document.getElementById("compass-arrow").style.transform =
-      `translate(-50%, -100%) rotate(${compassDegrees}deg)`;
-
-    bmpChart = buildChart(
-      "chartBmp",
-      "Temperatura BMP280",
-      data.history?.temperatura_bmp || [],
-      bmpChart
-    );
-
-    dhtChart = buildChart(
-      "chartDht",
-      "Temperatura DHT22",
-      data.history?.temperatura_dht || [],
-      dhtChart
-    );
-  } catch (error) {
-    console.error("Erro ao carregar dados:", error);
+    atualizarGraficoTemperatura(labels, valores, periodo);
+  } catch (erro) {
+    console.error("Erro ao trocar período:", erro);
   }
 }
 
-async function refreshData() {
-  if (updating) return;
-  updating = true;
-
+async function carregarValoresAtuais() {
   try {
-    await loadData();
-  } finally {
-    updating = false;
+    const [
+      temperatura,
+      umidade,
+      pressao,
+      vento,
+      chuva,
+      direcao
+    ] = await Promise.all([
+      buscarEstadoAtual(ENTIDADES.temperatura),
+      buscarEstadoAtual(ENTIDADES.umidade),
+      buscarEstadoAtual(ENTIDADES.pressao),
+      buscarEstadoAtual(ENTIDADES.vento),
+      buscarEstadoAtual(ENTIDADES.chuva),
+      buscarEstadoAtual(ENTIDADES.direcao)
+    ]);
+
+    document.getElementById("temperatura-atual").textContent =
+      `${parseFloat(temperatura.state).toFixed(1)} °C`;
+
+    document.getElementById("umidade-atual").textContent =
+      `${parseFloat(umidade.state).toFixed(1)} %`;
+
+    document.getElementById("pressao-atual").textContent =
+      `${parseFloat(pressao.state).toFixed(1)} hPa`;
+
+    document.getElementById("vento-atual").textContent =
+      `${parseFloat(vento.state).toFixed(2)} km/h`;
+
+    document.getElementById("chuva-atual").textContent =
+      `${parseFloat(chuva.state).toFixed(2)} mL`;
+
+    document.getElementById("direcao-atual").textContent =
+      `${direcao.state}`;
+  } catch (erro) {
+    console.error("Erro ao carregar valores atuais:", erro);
   }
 }
 
-// 🚀 Atualização automática
-refreshData();
-setInterval(refreshData, 5000);
+async function iniciarPainel() {
+  await carregarValoresAtuais();
+  await trocarPeriodo("24h");
+}
+
+iniciarPainel();
+
+// Atualiza os cards atuais a cada 30 segundos
+setInterval(carregarValoresAtuais, 30000);
