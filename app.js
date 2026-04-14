@@ -106,9 +106,8 @@ async function carregarDados(periodo = "24h") {
     const pressaoEl = document.getElementById("pressao-atual");
     const ventoEl = document.getElementById("vento-atual");
     const chuvaEl = document.getElementById("chuva-atual");
-    const direcaoEl = document.getElementById("direcao-atual");
-
-    if (!temperaturaEl || !umidadeEl || !pressaoEl || !ventoEl || !chuvaEl || !direcaoEl) {
+    
+    if (!temperaturaEl || !umidadeEl || !pressaoEl || !ventoEl || !chuvaEl) {
       console.error("Um ou mais elementos do HTML não foram encontrados.");
       return;
     }
@@ -118,8 +117,7 @@ async function carregarDados(periodo = "24h") {
     pressaoEl.textContent = `${parseFloat(dados.current.pressao.state).toFixed(1)} ${dados.current.pressao.unit}`;
     ventoEl.textContent = `${parseFloat(dados.current.vento_vel.state).toFixed(2)} ${dados.current.vento_vel.unit}`;
     chuvaEl.textContent = `${parseFloat(dados.current.chuva.state).toFixed(2)} ${dados.current.chuva.unit}`;
-    direcaoEl.textContent = `${dados.current.vento_dir.state}`;
-
+    
     const historicoBruto = dados.history.temperatura_bmp || [];
     const historico = reduzirPontos(historicoBruto, periodo);
 
