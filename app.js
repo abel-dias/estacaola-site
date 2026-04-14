@@ -1,4 +1,5 @@
 let graficoTemperatura = null;
+let periodoAtual = "24h";
 
 function marcarBotaoAtivo(periodo) {
   document.querySelectorAll(".filtros-periodo button").forEach((btn) => {
@@ -32,27 +33,15 @@ function formatarRotulo(dataIso, periodo) {
 }
 
 function reduzirPontos(historico, periodo) {
-  if (periodo === "24h") {
-    return historico.filter((_, i) => i % 3 === 0);
-  }
-
-  if (periodo === "7d") {
-    return historico.filter((_, i) => i % 6 === 0);
-  }
-
-  if (periodo === "30d") {
-    return historico.filter((_, i) => i % 12 === 0);
-  }
-
+  if (periodo === "24h") return historico.filter((_, i) => i % 3 === 0);
+  if (periodo === "7d") return historico.filter((_, i) => i % 6 === 0);
+  if (periodo === "30d") return historico.filter((_, i) => i % 12 === 0);
   return historico;
 }
 
 function atualizarGraficoTemperatura(labels, valores, periodo) {
   const canvas = document.getElementById("graficoTemperatura");
-  if (!canvas) {
-    console.error("Elemento graficoTemperatura não encontrado.");
-    return;
-  }
+  if (!canvas) return;
 
   const ctx = canvas.getContext("2d");
 
@@ -93,11 +82,14 @@ function atualizarGraficoTemperatura(labels, valores, periodo) {
 
 async function carregarDados(periodo = "24h") {
   try {
-    const resposta = await fetch(`/api/estacao?period=${periodo}`);
+    const resposta = await fetch(`/api/estacao?period=${periodo}`, {
+      cache: "no-store",
+    });
+
     const dados = await resposta.json();
 
-    if (dados.error) {
-      console.error("Erro da API:", dados.message);
+    if (!resposta.ok || dados.error) {
+      console.error("Erro da API:", dados);
       return;
     }
 
@@ -106,7 +98,7 @@ async function carregarDados(periodo = "24h") {
     const pressaoEl = document.getElementById("pressao-atual");
     const ventoEl = document.getElementById("vento-atual");
     const chuvaEl = document.getElementById("chuva-atual");
-    
+
     if (!temperaturaEl || !umidadeEl || !pressaoEl || !ventoEl || !chuvaEl) {
       console.error("Um ou mais elementos do HTML não foram encontrados.");
       return;
@@ -117,7 +109,7 @@ async function carregarDados(periodo = "24h") {
     pressaoEl.textContent = `${parseFloat(dados.current.pressao.state).toFixed(1)} ${dados.current.pressao.unit}`;
     ventoEl.textContent = `${parseFloat(dados.current.vento_vel.state).toFixed(2)} ${dados.current.vento_vel.unit}`;
     chuvaEl.textContent = `${parseFloat(dados.current.chuva.state).toFixed(2)} ${dados.current.chuva.unit}`;
-    
+
     const historicoBruto = dados.history.temperatura_bmp || [];
     const historico = reduzirPontos(historicoBruto, periodo);
 
@@ -131,11 +123,12 @@ async function carregarDados(periodo = "24h") {
 }
 
 async function trocarPeriodo(periodo) {
+  periodoAtual = periodo;
   marcarBotaoAtivo(periodo);
   await carregarDados(periodo);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
   await trocarPeriodo("24h");
-  setInterval(() => carregarDados("24h"), 30000);
+  setInterval(() => carregarDados(periodoAtual), 30000);
 });
