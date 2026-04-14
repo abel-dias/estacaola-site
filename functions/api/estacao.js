@@ -11,7 +11,6 @@ export async function onRequestGet(context) {
     umidade: "sensor.estacao_meteorologica_umidade",
     pressao: "sensor.estacao_meteorologica_pressao_atmosferica",
     vento_vel: "sensor.estacao_meteorologica_velocidade_do_vento",
-    vento_dir: "text_sensor.estacao_meteorologica_direcao_do_vento",
     chuva: "sensor.estacao_meteorologica_pluviometro_volume",
   };
 
@@ -77,7 +76,6 @@ export async function onRequestGet(context) {
       getState(ENTITIES.umidade),
       getState(ENTITIES.pressao),
       getState(ENTITIES.vento_vel),
-      getState(ENTITIES.vento_dir),
       getState(ENTITIES.chuva),
       getHistory(ENTITIES.temperatura_bmp, hours),
     ]);
@@ -106,10 +104,6 @@ export async function onRequestGet(context) {
           vento_vel: {
             state: ventoVel.state,
             unit: ventoVel.attributes.unit_of_measurement || "km/h",
-          },
-          vento_dir: {
-            state: ventoDir.state,
-            unit: "",
           },
           chuva: {
             state: chuva.state,
