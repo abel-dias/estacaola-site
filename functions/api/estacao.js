@@ -2,22 +2,37 @@ export async function onRequestGet(context) {
   const HA_URL = context.env.HA_URL;
   const HA_TOKEN = context.env.HA_TOKEN;
 
+  if (!HA_URL || !HA_TOKEN) {
+    return new Response(
+      JSON.stringify({
+        error: true,
+        message: "Variáveis HA_URL ou HA_TOKEN não configuradas no Cloudflare.",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
+
   const url = new URL(context.request.url);
   const period = url.searchParams.get("period") || "24h";
 
   const ENTITIES = {
-    temperatura_dht: "sensor.estacao_meteorologica_temperatura_dht22",
     temperatura_bmp: "sensor.estacao_meteorologica_temperatura_bmp280",
+    temperatura_dht: "sensor.estacao_meteorologica_temperatura_dht22",
     umidade: "sensor.estacao_meteorologica_umidade",
     pressao: "sensor.estacao_meteorologica_pressao_atmosferica",
     vento_vel: "sensor.estacao_meteorologica_velocidade_do_vento",
     chuva: "sensor.estacao_meteorologica_pluviometro_volume",
   };
 
-  function getHoursFromPeriod(period) {
-    if (period === "24h") return 24;
-    if (period === "7d") return 24 * 7;
-    if (period === "30d") return 24 * 30;
+  function getHoursFromPeriod(p) {
+    if (p === "24h") return 24;
+    if (p === "7d") return 24 * 7;
+    if (p === "30d") return 24 * 30;
     return 24;
   }
 
@@ -30,7 +45,7 @@ export async function onRequestGet(context) {
     });
 
     if (!res.ok) {
-      throw new Error(`Erro ao buscar ${entityId}`);
+      throw new Error(`Erro ao buscar ${entityId}: ${res.status}`);
     }
 
     return res.json();
@@ -51,7 +66,7 @@ export async function onRequestGet(context) {
     );
 
     if (!res.ok) {
-      throw new Error(`Erro ao buscar histórico de ${entityId}`);
+      throw new Error(`Erro ao buscar histórico de ${entityId}: ${res.status}`);
     }
 
     const data = await res.json();
@@ -62,17 +77,16 @@ export async function onRequestGet(context) {
     const hours = getHoursFromPeriod(period);
 
     const [
-      temperaturaDht,
       temperaturaBmp,
+      temperaturaDht,
       umidade,
       pressao,
       ventoVel,
-      ventoDir,
       chuva,
       histBmp,
     ] = await Promise.all([
-      getState(ENTITIES.temperatura_dht),
       getState(ENTITIES.temperatura_bmp),
+      getState(ENTITIES.temperatura_dht),
       getState(ENTITIES.umidade),
       getState(ENTITIES.pressao),
       getState(ENTITIES.vento_vel),
@@ -85,13 +99,13 @@ export async function onRequestGet(context) {
         updated_at: new Date().toISOString(),
         period,
         current: {
-          temperatura_dht: {
-            state: temperaturaDht.state,
-            unit: temperaturaBmp.attributes?.unit_of_measurement || "°C",
-          },
           temperatura_bmp: {
             state: temperaturaBmp.state,
             unit: temperaturaBmp.attributes?.unit_of_measurement || "°C",
+          },
+          temperatura_dht: {
+            state: temperaturaDht.state,
+            unit: temperaturaDht.attributes?.unit_of_measurement || "°C",
           },
           umidade: {
             state: umidade.state,
