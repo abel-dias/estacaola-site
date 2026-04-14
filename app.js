@@ -41,7 +41,10 @@ function reduzirPontos(historico, periodo) {
 
 function atualizarGraficoTemperatura(labels, valores, periodo) {
   const canvas = document.getElementById("graficoTemperatura");
-  if (!canvas) return;
+  if (!canvas) {
+    console.error("Canvas do gráfico não encontrado.");
+    return;
+  }
 
   const ctx = canvas.getContext("2d");
 
@@ -88,6 +91,8 @@ async function carregarDados(periodo = "24h") {
 
     const dados = await resposta.json();
 
+    console.log("Resposta da API:", dados);
+
     if (!resposta.ok || dados.error) {
       console.error("Erro da API:", dados);
       return;
@@ -98,6 +103,14 @@ async function carregarDados(periodo = "24h") {
     const pressaoEl = document.getElementById("pressao-atual");
     const ventoEl = document.getElementById("vento-atual");
     const chuvaEl = document.getElementById("chuva-atual");
+
+    console.log("Elementos encontrados:", {
+      temperaturaEl,
+      umidadeEl,
+      pressaoEl,
+      ventoEl,
+      chuvaEl,
+    });
 
     if (!temperaturaEl || !umidadeEl || !pressaoEl || !ventoEl || !chuvaEl) {
       console.error("Um ou mais elementos do HTML não foram encontrados.");
@@ -129,6 +142,7 @@ async function trocarPeriodo(periodo) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  console.log("Página carregada, iniciando...");
   await trocarPeriodo("24h");
   setInterval(() => carregarDados(periodoAtual), 30000);
 });
