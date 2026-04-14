@@ -87,27 +87,27 @@ export async function onRequestGet(context) {
         current: {
           temperatura_dht: {
             state: temperaturaDht.state,
-            unit: temperaturaDht.attributes.unit_of_measurement || "°C",
+            unit: temperaturaBmp.attributes?.unit_of_measurement || "°C",
           },
           temperatura_bmp: {
             state: temperaturaBmp.state,
-            unit: temperaturaBmp.attributes.unit_of_measurement || "°C",
+            unit: temperaturaBmp.attributes?.unit_of_measurement || "°C",
           },
           umidade: {
             state: umidade.state,
-            unit: umidade.attributes.unit_of_measurement || "%",
+            unit: umidade.attributes?.unit_of_measurement || "%",
           },
           pressao: {
             state: pressao.state,
-            unit: pressao.attributes.unit_of_measurement || "hPa",
+            unit: pressao.attributes?.unit_of_measurement || "hPa",
           },
           vento_vel: {
             state: ventoVel.state,
-            unit: ventoVel.attributes.unit_of_measurement || "km/h",
+            unit: ventoVel.attributes?.unit_of_measurement || "km/h",
           },
           chuva: {
             state: chuva.state,
-            unit: chuva.attributes.unit_of_measurement || "mL",
+            unit: chuva.attributes?.unit_of_measurement || "mL",
           },
         },
         history: {
