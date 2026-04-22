@@ -110,14 +110,14 @@ body {
   height: 420px;
 }
 
-.footer {
+footer {
   margin-top: 30px;
   padding: 15px;
   background: #111;
   color: white;
 }
 
-.footer a {
+footer a {
   color: #00bcd4;
   text-decoration: none;
   margin: 0 10px;
