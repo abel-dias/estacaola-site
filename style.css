@@ -2,67 +2,177 @@
   box-sizing: border-box;
 }
 
+:root {
+  --azul-escuro: #0f172a;
+  --azul: #2563eb;
+  --azul-claro: #38bdf8;
+  --verde: #22c55e;
+  --amarelo: #facc15;
+  --laranja: #fb923c;
+  --texto: #1f2937;
+  --texto-suave: #64748b;
+  --branco: #ffffff;
+  --fundo-card: rgba(255, 255, 255, 0.92);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f7fb;
-  color: #1f2937;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--texto);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.35), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.25), transparent 30%),
+    linear-gradient(135deg, #e0f2fe 0%, #f8fafc 45%, #dcfce7 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.55) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.55) 1px, transparent 1px);
+  background-size: 38px 38px;
+  pointer-events: none;
+  opacity: 0.4;
 }
 
 .container {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px;
+  position: relative;
+  z-index: 1;
 }
 
 .topo {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  padding: 34px 22px;
+  border-radius: 28px;
+  color: white;
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(37, 99, 235, 0.82)),
+    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80");
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+  overflow: hidden;
+  position: relative;
+}
+
+.topo::after {
+  content: "☀️  🌧️  🌬️";
+  position: absolute;
+  right: 20px;
+  bottom: 15px;
+  font-size: 2.2rem;
+  opacity: 0.22;
 }
 
 .topo h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  letter-spacing: -1px;
 }
 
 .topo p {
-  margin-top: 8px;
-  color: #6b7280;
+  margin: 12px auto 0;
+  max-width: 720px;
+  color: #e0f2fe;
+  font-size: 1.08rem;
+  line-height: 1.6;
+}
+
+.menu {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 20px 0 0;
+}
+
+.menu a,
+.botao-voltar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.menu a:hover,
+.botao-voltar:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
 }
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 18px;
+  margin-bottom: 26px;
+}
+
+.card,
+.painel-grafico,
+.pagina-card {
+  background: var(--fundo-card);
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
 }
 
 .card {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  right: -35px;
+  top: -35px;
+  background: linear-gradient(135deg, var(--azul-claro), var(--verde));
+  opacity: 0.24;
 }
 
 .card h3 {
   margin: 0 0 10px 0;
   font-size: 1rem;
-  color: #374151;
+  color: #334155;
 }
 
 .card p {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: bold;
+  color: var(--azul-escuro);
 }
 
 .painel-grafico {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 20px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 24px;
 }
 
 .grafico-topo {
@@ -76,6 +186,7 @@ body {
 
 .grafico-topo h2 {
   margin: 0;
+  color: var(--azul-escuro);
 }
 
 .filtros-periodo {
@@ -86,22 +197,23 @@ body {
 
 .filtros-periodo button {
   border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
+  border-radius: 999px;
+  padding: 11px 15px;
   cursor: pointer;
   font-weight: bold;
-  background: #2563eb;
+  background: linear-gradient(135deg, var(--azul), var(--azul-claro));
   color: white;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.22);
 }
 
 .filtros-periodo button:hover {
-  opacity: 0.92;
+  opacity: 0.95;
   transform: translateY(-1px);
 }
 
 .filtros-periodo button.ativo {
-  background: #1d4ed8;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
 }
 
 .grafico-box {
@@ -110,25 +222,83 @@ body {
   height: 420px;
 }
 
+.pagina-card {
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1.75;
+  font-size: 1.04rem;
+}
+
+.pagina-card h2 {
+  color: var(--azul);
+  margin-top: 26px;
+  margin-bottom: 8px;
+}
+
+.pagina-card p {
+  color: #334155;
+}
+
+.destaque {
+  display: block;
+  margin: 18px 0;
+  padding: 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #dbeafe, #dcfce7);
+  border-left: 6px solid var(--azul);
+  color: var(--azul-escuro);
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.acoes-pagina {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.acoes-pagina .botao-voltar {
+  color: white;
+  background: linear-gradient(135deg, var(--azul), var(--verde));
+  border: none;
+}
+
 footer {
-  margin-top: 30px;
-  padding: 15px;
-  background: #111;
+  position: relative;
+  z-index: 1;
+  margin-top: 34px;
+  padding: 20px;
+  text-align: center;
+  background: rgba(15, 23, 42, 0.92);
   color: white;
 }
 
 footer a {
-  color: #00bcd4;
+  color: #7dd3fc;
   text-decoration: none;
   margin: 0 10px;
+  font-weight: 700;
+}
+
+footer a:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 14px;
+  }
+
+  .topo {
+    padding: 28px 16px;
+    border-radius: 22px;
+  }
+
   .grafico-box {
     height: 300px;
   }
 
-  .topo h1 {
-    font-size: 1.6rem;
+  .pagina-card {
+    padding: 18px;
   }
 }
