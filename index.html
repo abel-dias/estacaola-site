@@ -1,70 +1,140 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Estação Meteorológica</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4304270642812638"
-     crossorigin="anonymous"></script>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Estação Meteorológica</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script async
+src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4304270642812638"
+crossorigin="anonymous"></script>
+
 </head>
+
 <body>
-  
-  <div class="container">
-    <header class="topo">
-      <h1>Estação Meteorológica</h1>
-      <p>Monitoramento em tempo real</p>
-    </header>
 
-    <section class="cards">
-      <div class="card">
-        <h3>Temperatura</h3>
-        <p id="temperatura-atual">-- °C</p>
-      </div>
+<div class="container">
 
-      <div class="card">
-        <h3>Umidade</h3>
-        <p id="umidade-atual">-- %</p>
-      </div>
+<header class="topo">
 
-      <div class="card">
-        <h3>Pressão</h3>
-        <p id="pressao-atual">-- hPa</p>
-      </div>
+<h1>Estação Meteorológica</h1>
 
-      <div class="card">
-        <h3>Vento</h3>
-        <p id="vento-atual">-- km/h</p>
-      </div>
+<p>Monitoramento em tempo real</p>
 
-      <div class="card">
-        <h3>Chuva</h3>
-        <p id="chuva-atual">-- mL</p>
-      </div>
-    </section>
+</header>
 
-    <section class="painel-grafico">
-      <div class="grafico-topo">
-        <h2>Temperatura</h2>
-        <div class="filtros-periodo">
-          <button onclick="trocarPeriodo('24h')" id="btn-24h">24h</button>
-          <button onclick="trocarPeriodo('7d')" id="btn-7d">7 dias</button>
-          <button onclick="trocarPeriodo('30d')" id="btn-30d">30 dias</button>
-        </div>
-      </div>
+<section class="cards">
 
-      <div class="grafico-box">
-        <canvas id="graficoTemperatura"></canvas>
-      </div>
-    </section>
-  </div>
+<div class="card info-card" data-info="temperatura">
+
+<h3>🌡️ Temperatura</h3>
+
+<p id="temperatura-atual">-- °C</p>
+
+</div>
+
+<div class="card info-card" data-info="umidade">
+
+<h3>💧 Umidade</h3>
+
+<p id="umidade-atual">-- %</p>
+
+</div>
+
+<div class="card info-card" data-info="pressao">
+
+<h3>🌪️ Pressão</h3>
+
+<p id="pressao-atual">-- hPa</p>
+
+</div>
+
+<div class="card info-card" data-info="vento">
+
+<h3>💨 Vento</h3>
+
+<p id="vento-atual">-- km/h</p>
+
+</div>
+
+<div class="card info-card" data-info="chuva">
+
+<h3>🌧️ Chuva</h3>
+
+<p id="chuva-atual">-- mL</p>
+
+</div>
+
+</section>
+
+<section class="painel-grafico">
+
+<div class="grafico-topo">
+
+<h2>Temperatura</h2>
+
+<div class="filtros-periodo">
+
+<button onclick="trocarPeriodo('24h')" id="btn-24h">
+24h
+</button>
+
+<button onclick="trocarPeriodo('7d')" id="btn-7d">
+7 dias
+</button>
+
+<button onclick="trocarPeriodo('30d')" id="btn-30d">
+30 dias
+</button>
+
+</div>
+
+</div>
+
+<div class="grafico-box">
+
+<canvas id="graficoTemperatura"></canvas>
+
+</div>
+
+</section>
+
+</div>
+
 <footer>
-  <a href="sobre.html">Sobre</a> |
-  <a href="contato.html">Contato</a> |
-  <a href="privacidade.html">Política de Privacidade</a>
+
+<a href="sobre.html">Sobre</a> |
+
+<a href="contato.html">Contato</a> |
+
+<a href="privacidade.html">Política de Privacidade</a>
+
 </footer>
-  
-  <script src="app.js"></script>
+
+<div id="modal-info" class="modal-info">
+
+<div class="modal-box">
+
+<span id="fechar-modal">
+×
+</span>
+
+<h2 id="modal-titulo"></h2>
+
+<div id="modal-texto"></div>
+
+</div>
+
+</div>
+
+<script src="app.js"></script>
+
 </body>
 </html>
