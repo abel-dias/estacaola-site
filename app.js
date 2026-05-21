@@ -11,7 +11,7 @@ titulo:"🌡️ Temperatura",
 texto:`
 
 <p><strong>Sensor utilizado:</strong>
-BMP280 / BME280</p>
+BMP280 / DHT22</p>
 
 <p><strong>Como funciona:</strong><br>
 
@@ -32,7 +32,7 @@ titulo:"💧 Umidade",
 texto:`
 
 <p><strong>Sensor utilizado:</strong>
-BME280</p>
+DHT22</p>
 
 <p><strong>Como funciona:</strong><br>
 
@@ -53,7 +53,7 @@ titulo:"🌪️ Pressão Atmosférica",
 texto:`
 
 <p><strong>Sensor utilizado:</strong>
-BMP280 / BME280</p>
+BMP280</p>
 
 <p><strong>Como funciona:</strong><br>
 
