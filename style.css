@@ -426,8 +426,8 @@ transform:translateY(0);
 }
 
 .logo-escola {
-    width: 80px;
-    height: 80px;
+    width: 80px; /* ajuste conforme necessário */
+    height: auto;
     position: absolute;
     left: 20px;
 }
