@@ -419,6 +419,7 @@ transform:translateY(0);
     align-items: center;
     gap: 30px;
     position: relative;
+    min-height: 80px;
 }
 
 .titulo {
@@ -426,13 +427,7 @@ transform:translateY(0);
 }
 
 .logo-escola {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-
-    width: 60px;
-    height: 60px;
-
-    object-fit: contain;
+    width: 60px !important;
+    height: 60px !important;
+    border: 2px solid red;
 }
