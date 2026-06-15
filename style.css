@@ -412,3 +412,22 @@ transform:translateY(0);
 }
 
 }
+
+.cabecalho {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    position: relative;
+}
+
+.titulo {
+    text-align: center;
+}
+
+.logo-escola {
+    width: 80px; /* ajuste conforme necessário */
+    height: auto;
+    position: absolute;
+    left: 20px;
+}
